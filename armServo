@@ -1,71 +1,96 @@
-#include <Servo.h> 
+#include <Servo.h>
 //pin
 byte pinDC = 6;
-byte pinServo =5;
+byte pinServo = 5;
 byte speed_DC;
 //servo
-byte maxservo = 155;
-byte miniservo = 85;
-byte pos=110;
+byte maxservo = 110;
+byte miniservo = 80;
+byte reposservo = 90;
+byte pos = reposservo;
 int upOrDown;
-bool servo_repos=false;
-Servo bras;  
+int oldPos=pos;
+Servo bras;
 
 //btn
+byte BtnPush = 3;
 int BtnX = A0;
-int BtnY =A1;
+//int BtnY =A1;
 int ValX;
 int ValY;
+int ValBtnPush;
 
-void setup() 
-{ 
+void setup()
+{
   Serial.begin (9600);
   pinMode(pinDC, OUTPUT);
-  bras.attach(pinServo);  // attaches the servo on pin 9 to the servo object 
+  pinMode(BtnPush, INPUT_PULLUP);
+  bras.attach(pinServo);  // attaches the servo on pin 9 to the servo object
   delay(10);
   bras.write(pos);
-} 
+  delay(1000);
+
+  Serial.begin(9600);
+}
 
 
-void loop() 
+void loop()
 
-{ 
+{
   //lecture joystick
   ValX = analogRead(BtnX);//bras
-  ValY = analogRead(BtnY);//DC
+  ValBtnPush = digitalRead(BtnPush);//DC
+
   //code bras
-  if (ValX<550 && ValX>450){
+  if (ValX < 560 && ValX > 500) {
     Arm_off();
   }
-  else{
+  else {
     bras.attach(pinServo);
-    pos = map(ValX, 0, 1020,miniservo , maxservo);
-    bras.write(pos);
-    servo_repos=false;
+    delay(30);
+    pos = map(ValX, 0, 1023, miniservo , maxservo);
+    delay(30);
+    if (oldPos != pos) {
+      bras.write(pos);
+      oldPos=pos;
+
+     infoSerial();
+    }
+
+    delay(30);
+
   };
+  
   // code DC
-  if (ValY<600){
-    speed_DC =0;
+  if (ValBtnPush == true) {
+    speed_DC = 0;
   }
-  else{
-    speed_DC = map(ValY, 600, 1025, 0 , 1025); 
+  else {
+    speed_DC = 1000;
   }
   analogWrite(pinDC, speed_DC);
   delay(10);
-} 
-
-void Arm_off(){
-  if (pos!=110){
-  if (pos>110){
-    upOrDown = -1;
-  }
-  else{
-    upOrDown = 1;
-  }
-  pos = pos +(upOrDown);
-  bras.write(pos);
-  delay(100);
-  } 
-  if (pos ==110){
-  bras.detach(); }
 }
+
+void Arm_off() {
+  if (pos != reposservo) {
+    if (pos > reposservo) {
+      upOrDown = -1;
+    }
+    else {
+      upOrDown = 1;
+    }
+    pos = pos + upOrDown;
+    bras.write(pos);
+    delay(50);
+    infoSerial();
+  }
+  else if (pos == reposservo) {
+    bras.detach();
+  }
+}
+void infoSerial(){
+   Serial.print("pos ");
+  Serial.println(pos);
+  Serial.print("ValX ");
+  Serial.println(ValX);}
