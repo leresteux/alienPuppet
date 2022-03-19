@@ -40,9 +40,7 @@ void loop()
 {
   Arm();
   DC();
-  delay(10);
-  //lecture sur Serial
-  infoSerial();
+  InfoSerial();
 }
 
 void Arm_off() {
@@ -101,7 +99,7 @@ void DC() {
   }
 }
 
-void infoSerial() {
+void InfoSerial() {
   Serial.print("pos ");
   Serial.println(pos);
   Serial.print("ValX ");
