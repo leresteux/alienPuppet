@@ -32,36 +32,16 @@ void setup()
   bras.write(pos);
   delay(1000);
 
-  Serial.begin(9600);
 }
 
 
 void loop()
 
 {
-  //lecture joystick
-  ValX = analogRead(BtnX);//bras
-  delay(1);
-
-
-  //code bras
-  if (ValX < 560 && ValX > 500) {
-    Arm_off();
-  }
-  else {
-    bras.attach(pinServo);
-    delay(5);
-    pos = map(ValX, 0, 1023, miniservo , maxservo);
-    delay(5);
-    if (oldPos != pos) {
-      bras.write(pos);
-      oldPos = pos;
-    }
-    delay(5);
-  };
-
+  Arm();
   DC();
   delay(10);
+  //lecture sur Serial
   infoSerial();
 }
 
@@ -82,12 +62,33 @@ void Arm_off() {
     bras.detach();
   }
 }
+void Arm() {
+  //lecture joystick
+  ValX = analogRead(BtnX);//bras
+  delay(1);
+
+  if (ValX < 560 && ValX > 500) {
+    Arm_off();
+  }
+  else {
+    bras.attach(pinServo);
+    delay(1);
+    pos = map(ValX, 0, 1023, miniservo , maxservo);
+    delay(1);
+    if (oldPos != pos) {
+      bras.write(pos);
+      oldPos = pos;
+    }
+    delay(1);
+  };
+}
 void DC() {
+  //lecture joystick
   ValBtnPush = digitalRead(BtnPush);//DC
   delay(1);
-  // code DC
+  // on/off du DC
   if (ValBtnPush == false) {
-    DcMove =! DcMove;
+    DcMove = ! DcMove;
     if (DcMove) {
       speed_DC = 255;
     }
